@@ -19,7 +19,9 @@ function Chat() {
         const messagesRef = collection(db, 'messages');
         const q = query(messagesRef, orderBy('timestamp', 'asc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            setMessages(snapshot.docs.map((doc) => doc.data() as Message));
+            const newMessages = snapshot.docs.map((doc) => doc.data() as Message);
+        setMessages(newMessages);
+        console.log('✅ Fetched messages:', newMessages);
         });
         return () => unsubscribe();
     }, []);
@@ -43,7 +45,7 @@ function Chat() {
             <h1>Chat</h1>
             <div>
                 {messages.map((message) => (
-                    <div key={message.timestamp.toISOString()}>
+                    <div key={message.timestamp.toString()}>
                         <span>{message.senderName}</span>
                         <span>{message.text}</span>
                     </div>
