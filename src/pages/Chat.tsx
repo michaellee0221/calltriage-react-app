@@ -32,6 +32,7 @@ interface UserProfile {
   firstName: string;
   lastName: string;
   profile_image_url: string;
+  telnyxAssignedPhoneNumber: string;
 }
 
 function Chat() {
@@ -144,24 +145,29 @@ function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-red-700">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-gray-900 p-4 mb-2 text-white shadow-md">
+      <div className="sticky top-0 z-10 bg-red-700 p-2 mb-2 text-white shadow-md">
         {otherUser ? (
           <div className="flex items-center gap-3">
             <img
               src={otherUser.profile_image_url}
               alt="avatar"
-              className="w-10 h-10 rounded-full border-2 border-white"
+              className="w-12 h-12 rounded-full border-2 border-white"
             />
             <div>
               <p className="text-lg font-semibold">
                 {otherUser.firstName} {otherUser.lastName}
               </p>
+              <p className="text-sm text-gray-300">
+                {otherUser.telnyxAssignedPhoneNumber}
+              </p>
             </div>
           </div>
         ) : (
-          <p className="text-sm">Loading user info...</p>
+          <div className="flex rounded-md">
+            <div className="w-10 h-10 border-4 border-gray-50 border-dashed rounded-full animate-spin border-t-transparent"></div>
+          </div>
         )}
       </div>
 
@@ -196,58 +202,107 @@ function Chat() {
         )}
         <div ref={messagesEndRef} />
       </div>
-      {imageFile && (
-        <div className="relative inline-block">
-          <img
-            src={URL.createObjectURL(imageFile)}
-            alt="Preview"
-            className="max-w-xs max-h-40 rounded-md"
-          />
-
-          {loading && (
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
-              <div className="w-10 h-10 border-4 border-blue-500 border-dashed rounded-full animate-spin border-t-transparent"></div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Input Field */}
-      <div className="p-3 bg-gray-800 flex items-center gap-2 shadow-inner">
-        <label className="cursor-pointer text-gray-300 hover:text-white text-xl">
-          📎
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && file.type.startsWith("image/")) {
-                setImageFile(file);
-              } else {
-                alert("Only image files are allowed!");
-              }
-            }}
-          />
-        </label>
+      <div className="bg-red-500 rounded-lg flex-col gap-2 mt-1 shadow-inner">
+        {imageFile && (
+          <div className="relative p-2 pb-0 inline-block justify-center flex items-center">
+            <img
+              src={URL.createObjectURL(imageFile)}
+              alt="Preview"
+              className={`w-auto max-h-20 rounded-md ${
+                loading ? "blur-sm" : ""
+              }`}
+            />
 
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 rounded-xl px-4 py-2 text-black focus:outline-none"
-        />
-        <button
-          onClick={handleSend}
-          disabled={loading}
-          className={`px-4 py-2 rounded-xl text-white transition ${
-            loading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Sending..." : "Send"}
-        </button>
+            {loading && (
+              <div className="absolute inset-2 flex items-center justify-center rounded-md">
+                <div className="w-10 h-10 border-4 border-red-500 border-dashed rounded-full animate-spin border-t-transparent"></div>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex items-center gap-2 p-3 rounded-full">
+          {imageFile ? (
+            // Close icon when image is selected
+            <button
+              onClick={() => setImageFile(null)}
+              className="w-8 h-8 rounded-full bg-white border border-white flex items-center justify-center"
+              title="Remove image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          ) : (
+            // Default attachment icon
+            <label className="cursor-pointer text-sm">
+              <div className="w-8 h-8 rounded-full bg-white border border-white flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-auto text-red-700"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8.414a2 2 0 00-.586-1.414l-3.414-3.414A2 2 0 0012.586 3H4zm8 1.5L16.5 9H13a1 1 0 01-1-1V4.5zM4 13l3-3 2 2 4-4 3 3v3H4z" />
+                </svg>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file && file.type.startsWith("image/")) {
+                    setImageFile(file);
+                  } else {
+                    alert("Only image files are allowed!");
+                  }
+                }}
+              />
+            </label>
+          )}
+
+          {/* Message Input */}
+          <input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 rounded-lg px-3 py-2 text-black text-sm focus:outline-none placeholder-gray-500"
+          />
+
+          {/* Send Button */}
+          <button
+            onClick={handleSend}
+            disabled={loading}
+            className={`flex items-center justify-center w-8 h-8 rounded-full transition ${
+              loading
+                ? "bg-red-300 text-gray-500 cursor-not-allowed"
+                : "bg-white hover:bg-red-100 text-red-600"
+            }`}
+          >
+            {loading ? (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Scroll to bottom button */}
