@@ -12,6 +12,7 @@ import {
   or,
   and,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -20,6 +21,7 @@ import MyChatMessage from "../components/MyChatMessage";
 import { useLocation } from "react-router-dom";
 
 interface Message {
+  id: string;
   sender: string;
   recipient: string;
   type: string;
@@ -59,6 +61,13 @@ function Chat() {
     fetchUserProfile();
   }, [appUserId]);
 
+  useEffect(() => {
+    // Auto scroll to bottom
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
+
   // Listen to messages
   useEffect(() => {
     const messagesRef = collection(db, "messages");
@@ -79,15 +88,21 @@ function Chat() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map((doc) => ({
-        ...(doc.data() as Message),
-      }));
+      const newMessages = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          sender: data.sender || "",
+          recipient: data.recipient || "",
+          type: data.type || "0",
+          messageText: data.messageText || "",
+          attachUrl: data.attachUrl || "",
+          timestamp: data.timestamp || Timestamp.now(),
+        } as Message;
+      });
       setMessages(newMessages);
 
-      // Auto scroll to bottom
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      console.log("Messages updated:", newMessages);
     });
 
     return () => unsubscribe();
@@ -116,6 +131,10 @@ function Chat() {
       });
 
       setImageFile(null);
+      // Auto scroll to bottom
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     } catch (error) {
       console.error("Upload failed:", error);
       alert("Upload failed. Please try again.");
@@ -142,6 +161,15 @@ function Chat() {
     });
 
     setMessage("");
+    // Auto scroll to bottom
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    // Delete from Firestore or your state
+    await deleteDoc(doc(db, "messages", id)); // Example for Firestore
   };
 
   return (
@@ -185,6 +213,7 @@ function Chat() {
               message={msg.messageText}
               type={msg.type || "0"}
               attachUrl={msg.attachUrl || ""}
+              onDelete={() => handleDeleteMessage(msg.id)}
             />
           ) : (
             <ChatMessage
@@ -197,6 +226,7 @@ function Chat() {
               message={msg.messageText}
               type={msg.type || "0"}
               attachUrl={msg.attachUrl || ""}
+              onDelete={() => handleDeleteMessage(msg.id)}
             />
           )
         )}
@@ -310,9 +340,23 @@ function Chat() {
         onClick={() =>
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
         }
-        className="fixed bottom-24 right-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-full shadow-lg"
+        className="hidden inline-flex fixed bottom-24 right-10 items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50"
       >
-        ↓
+        <svg
+          className="w-6 h-6 text-white"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 10 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1"
+            d="M5 1v12m0 0 4-4m-4 4L1 9"
+          />
+        </svg>
       </button>
     </div>
   );
