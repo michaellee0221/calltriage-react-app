@@ -173,7 +173,8 @@ function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-red-700">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-red-700 px-safe pb-[env(safe-area-inset-bottom)]">
+
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 bg-red-700 p-2 mb-2 text-white shadow-md">
         {otherUser ? (
@@ -200,7 +201,8 @@ function Chat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 max-h-[calc(100vh-170px)]">
+
         {messages.map((msg, index) =>
           msg.sender === profileId ? (
             <MyChatMessage
@@ -234,13 +236,14 @@ function Chat() {
       </div>
 
       {/* Input Field */}
-      <div className="bg-red-500 rounded-lg flex-col gap-2 mt-1 shadow-inner">
+      <div className="bg-red-500 rounded-lg flex-col gap-2 mt-1 shadow-inner flex-shrink-0">
+
         {imageFile && (
           <div className="relative p-2 pb-0 inline-block justify-center flex items-center">
             <img
               src={URL.createObjectURL(imageFile)}
               alt="Preview"
-              className={`w-auto max-h-20 rounded-md ${
+              className={`w-auto max-h-20 rounded-md object-contain ${
                 loading ? "blur-sm" : ""
               }`}
             />
@@ -252,12 +255,12 @@ function Chat() {
             )}
           </div>
         )}
-        <div className="flex items-center gap-2 p-3 rounded-full">
+        <div className="flex items-center gap-2 p-3 rounded-full w-full max-w-full mx-auto">
+          {/* Image Toggle */}
           {imageFile ? (
-            // Close icon when image is selected
             <button
               onClick={() => setImageFile(null)}
-              className="w-8 h-8 rounded-full bg-white border border-white flex items-center justify-center"
+              className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-white border border-white flex items-center justify-center"
               title="Remove image"
             >
               <svg
@@ -268,17 +271,12 @@ function Chat() {
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           ) : (
-            // Default attachment icon
             <label className="cursor-pointer text-sm">
-              <div className="w-8 h-8 rounded-full bg-white border border-white flex items-center justify-center">
+              <div className="w-8 h-8 min-w-8 min-h-8 rounded-full bg-white border border-white flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-6 h-auto text-red-700"
@@ -315,30 +313,25 @@ function Chat() {
               }
             }}
             placeholder="Type a message..."
-            className="flex-1 rounded-lg px-3 py-2 text-black text-sm focus:outline-none placeholder-gray-500"
+            className="flex-grow min-w-0 rounded-lg px-2 sm:px-3 py-2 text-black text-sm focus:outline-none placeholder-gray-500 bg-white"
           />
 
           {/* Send Button */}
           <button
             onClick={handleSend}
             disabled={loading}
-            className={`flex items-center justify-center w-8 h-8 rounded-full transition ${
+            className={`flex items-center justify-center w-8 h-8 min-w-8 min-h-8 rounded-full transition ${
               loading
                 ? "bg-red-300 text-gray-500 cursor-not-allowed"
                 : "bg-white hover:bg-red-100 text-red-600"
             }`}
           >
-            {loading ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
-              </svg>
-            )}
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+            </svg>
           </button>
         </div>
+
       </div>
 
       {/* Scroll to bottom button */}
